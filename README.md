@@ -8,7 +8,19 @@
 
 See the [Requirements](#Requirements) section below for more details.
 
+## ai-devel Branch Notes
+
+This branch includes integration work focused on import and packaging improvements.
+
+-   QIF import: category/account mapping behavior was improved so explicit QIF categories/transfers are applied more reliably during import.
+
+-   Revolut CSV import: new import flow and parser support were added, including optional payee-to-account mapping support.
+
+-   Packaging: distribution launch behavior and startup script handling were updated for better production usability.
+
 ### Contents:
+
+-   [ai-devel Branch Notes](#ai-devel-branch-notes)
 
 -   [About jGnash](#About)
 
@@ -64,7 +76,8 @@ The latest version of jGnash uses **OpenJFX** for the user interface. This repla
 
 ## Donations
 
-Donations are always welcome and appreciated. This helps to defer the cost of computer hardware and internet access.
+You can always keep making donations to the original developer of jGnash who indicated that donations are always welcome and appreciated to help to defer the cost of computer hardware and internet access.
+This ai-devel fork branch doesn't require right now donations as code is produced by AI.
 
 [<span class="image">![PayPal](https://img.shields.io/badge/Donate-PayPal-green.svg)</span>](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TYN4QECUL5C44)
 
@@ -81,6 +94,7 @@ The preferred method of reporting bugs is to use the [Github Issue tracker](http
 ### 1. Java
 
 Java 11 or newer is required to run jGnash. Unless you have a specific need for a newer version, Java 11 is currently recommended.
+Note: The ai-devel branch has been tested with openjdk 21.0.9
 
 Use of a prebuilt installer is recommended.
 
@@ -163,7 +177,7 @@ Note
 
 ## Download jGnash
 
-You can download jGnash from the [jGnash Download Page](https://sourceforge.net/projects/jgnash/files/Active%20Stable%202.x/). <span class="image"><a href="https://sourceforge.net/projects/jgnash/files/latest/download" class="image"><img src="https://img.shields.io/sourceforge/dt/jgnash.svg" alt="Download button" /></a></span>
+You can download jGnash from the [jGnash Download Page](https://github.com/rvmanza-git/jgnash/releases/latest). <span class="image"><a href="https://github.com/rvmanza-git/jgnash/releases/latest/download" class="image"><img src="https://img.shields.io/sourceforge/dt/jgnash.svg" alt="Download button" /></a></span>
 
 ## To Install jGnash
 
@@ -241,6 +255,8 @@ The [Google Groups jGnash Developer list](https://groups.google.com/forum/#!foru
 The IDE used for the development of jGnash is IntelliJ IDEA, but any IDE that supports a Gradle build environment should work.
 
 <span class="image"><a href="https://www.jetbrains.com/idea/" class="image"><img src="https://github.com/jGnash/jgnash.github.io/blob/master/img/logo_IntelliJIDEA.png" height="90" alt="IntelliJIDEA Logo" /></a></span>
+
+NOTE: The ai-devel branch for the fork uses Visual Studio Code and GitHub AI.
 
 ### Building jGnash:
 
