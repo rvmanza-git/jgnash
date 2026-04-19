@@ -37,6 +37,7 @@
         <Menu text="%Menu.Import.Name" id="importMenu">
             <MenuItem text="%Menu.ImportOfx.Name" fx:id="importOfxMenuItem" onAction="#handleImportOFXAction"/>
             <MenuItem text="%Menu.ImportQif.Name" fx:id="importQifMenuItem" onAction="#handleImportQIFAction"/>
+            <MenuItem text="Revolut CSV..." fx:id="importRevolutCsvMenuItem" onAction="#handleImportRevolutCSVAction"/>
             <SeparatorMenuItem/>
             <MenuItem text="%Menu.ImportAccounts.Name"  fx:id="importAccountsMenuItem" onAction="#handleImportAccountsAction"/>
         </Menu>

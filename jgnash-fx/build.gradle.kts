@@ -15,13 +15,12 @@ plugins {
     application // creates a task to run the full application
     `java-library`
     id("org.openjfx.javafxplugin")
-    id("edu.sc.seis.macAppBundle")
 }
 
 val jGnashVersion : String = version.toString()
 
 application {
-    mainClassName = "jgnash.app.jGnash"
+    mainClass.set("jgnash.app.jGnash")
 }
 
 dependencies {
@@ -149,14 +148,6 @@ distributions {
     }
 }
 
-macAppBundle {
-    appStyle = "universalJavaApplicationStub"
-    appName = "jGnash-$jGnashVersion"
-    mainClassName = "jgnash.app.jGnash"
-    icon = "../deployfx/gnome-money.icns"
-    javaProperties["apple.laf.useScreenMenuBar"] = "true"
-}
-
 /**
  * Returns a proper Class-Path entry for the manifest file
  * @return classpath relative to the installation root point to the jars in the lib directory
@@ -182,42 +173,3 @@ tasks.jar {
     }
 }
 
-tasks.register("macDist") {
-    description = "Creates a Mac compatible .app distribution directory"
-    dependsOn("createApp", "distZip")
-
-    doLast {
-        configurations.runtimeClasspath.get().files.forEach {
-            // copy all files in the class path, but ignore windows and linux specific files
-            if (!it.name.contains("linux.jar") && !it.name.contains("win.jar")) {
-                it.copyTo(file("$buildDir/macApp/jGnash-$jGnashVersion.app/Contents/Java/" + it.name), true)
-            }
-        }
-    }
-}
-
-tasks.register<Zip>("macDistZip") {
-    description = "Creates a Mac compatible archive of the .app distribution directory"
-
-    dependsOn("clean", "macDist")
-    archiveFileName.set("jGnash-$jGnashVersion.App.zip")
-    destinationDirectory.set(rootDir)
-
-    from("$buildDir/macApp")
-
-    from("../jgnash-manual/src/Manual.pdf") {
-        into("jGnash-$jGnashVersion.app/Contents/SharedSupport")
-    }
-
-    from("../changelog.adoc") {
-        into("jGnash-$jGnashVersion.app/Contents/SharedSupport")
-    }
-
-    from("../README.adoc") {
-        into("jGnash-$jGnashVersion.app/Contents/SharedSupport")
-    }
-
-    from("../README.html") {
-        into("jGnash-$jGnashVersion.app/Contents/SharedSupport")
-    }
-}

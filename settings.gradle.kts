@@ -14,7 +14,7 @@ pluginManagement {
     }
 }
 
-enableFeaturePreview("VERSION_ORDERING_V2")
+// Removed for Gradle 8.x compatibility.
 
 rootProject.name = "jgnash"
 

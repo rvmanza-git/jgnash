@@ -705,6 +705,7 @@ public final class QifParser {
     }
 
     void dumpStats() {
+        System.out.println("This is the new jar version 3.6.0");
         System.out.println("Num Classes :" + classes.size());
         System.out.println("Num Categories :" + categories.size());
         System.out.println("Num Securities :" + securities.size());
@@ -719,6 +720,7 @@ public final class QifParser {
             for (int j = 0; j < size; j++) {
                 QifTransaction tran = acc.getTransactions().get(j);
                 System.out.println("        Transaction " + (j + 1) + " " + tran.getPayee());
+                //System.out.println("          Transaction category " + tran.getCategory());
                 System.out.println("            Num Splits :" + tran.splits.size());
                 for (int k = 0; k < tran.splits.size(); k++) {
                     System.out.println("                Split " + (k + 1) + " " + tran.splits.get(k).memo);

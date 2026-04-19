@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +53,7 @@ import jgnash.convert.importat.ImportFilter;
 import jgnash.convert.importat.ImportState;
 import jgnash.convert.importat.ImportTransaction;
 import jgnash.convert.importat.ImportUtils;
+import jgnash.convert.importat.qif.QifTransaction;
 import jgnash.engine.Account;
 import jgnash.engine.AccountType;
 import jgnash.engine.CurrencyNode;
@@ -378,6 +380,9 @@ public class ImportPageTwoController extends AbstractWizardPaneController<Import
                 BayesImportClassifier.classifyTransactions(list, baseAccount.getSortedTransactionList(), baseAccount);
             }
 
+            // Use the QIF category when available and only fall back to Bayes predictions.
+            applyQifCategoryOverrides(list);
+
             // override the classifier if an account has been specified already
             for (final ImportTransaction importTransaction : list) {
                 final Account account = ImportUtils.matchAccount(importTransaction);
@@ -396,6 +401,116 @@ public class ImportPageTwoController extends AbstractWizardPaneController<Import
         JavaFXUtils.runLater(tableViewManager::packTable);
 
         updateDescriptor();
+    }
+
+    private void applyQifCategoryOverrides(final List<ImportTransaction> list) {
+        final Engine engine = EngineFactory.getEngine(EngineFactory.DEFAULT);
+        Objects.requireNonNull(engine);
+
+        final Map<String, Account> expenseMap = new HashMap<>();
+        final Map<String, Account> incomeMap = new HashMap<>();
+        final Map<String, Account> accountMap = new HashMap<>();
+
+        loadCategoryMap(engine.getExpenseAccountList(), expenseMap);
+        loadCategoryMap(engine.getIncomeAccountList(), incomeMap);
+        loadTransferAccountMap(engine.getAccountList(), accountMap);
+
+        for (final ImportTransaction importTransaction : list) {
+            if (importTransaction instanceof final QifTransaction qifTransaction) {
+                final Account account = findBestQifAccount(qifTransaction.category, accountMap, expenseMap, incomeMap);
+
+                if (account != null) {
+                    importTransaction.setAccount(account);
+                }
+            }
+        }
+    }
+
+    private static void loadCategoryMap(final List<Account> list, final Map<String, Account> map) {
+        if (list != null) {
+            for (final Account account : list) {
+                loadCategoryMap(account, map);
+            }
+        }
+    }
+
+    private static void loadCategoryMap(final Account account, final Map<String, Account> map) {
+        map.put(account.getName(), account);
+
+        final String pathName = account.getPathName();
+        final int index = pathName.indexOf(':');
+
+        if (index != -1) {
+            map.put(pathName.substring(index + 1), account);
+        }
+
+        for (final Account child : account.getChildren()) {
+            loadCategoryMap(child, map);
+        }
+    }
+
+    private static void loadTransferAccountMap(final List<Account> list, final Map<String, Account> map) {
+        for (final Account account : list) {
+            if (account.getAccountType() != AccountType.EXPENSE && account.getAccountType() != AccountType.INCOME) {
+                map.put(account.getName(), account);
+
+                final String pathName = account.getPathName();
+                final int index = pathName.indexOf(':');
+
+                if (index != -1) {
+                    map.put(pathName.substring(index + 1), account);
+                }
+            }
+        }
+    }
+
+    private static Account findBestQifAccount(final String category, final Map<String, Account> accountMap,
+                                              final Map<String, Account> expenseMap,
+                                              final Map<String, Account> incomeMap) {
+        if (category == null || category.isEmpty()) {
+            return null;
+        }
+
+        if (isAccount(category)) {
+            final String accountName = category.substring(1, category.length() - 1);
+            return accountMap.get(accountName);
+        }
+
+        final String categoryName = stripCategoryTags(category);
+
+        Account account = expenseMap.get(categoryName);
+        if (account == null) {
+            account = incomeMap.get(categoryName);
+        }
+
+        if (account == null) {
+            final int separator = categoryName.lastIndexOf(':');
+
+            if (separator >= 0 && separator + 1 < categoryName.length()) {
+                final String leafCategory = categoryName.substring(separator + 1);
+
+                account = expenseMap.get(leafCategory);
+                if (account == null) {
+                    account = incomeMap.get(leafCategory);
+                }
+            }
+        }
+
+        return account;
+    }
+
+    private static boolean isAccount(final String category) {
+        return category.startsWith("[") && category.endsWith("]");
+    }
+
+    private static String stripCategoryTags(final String category) {
+        final int separator = category.indexOf('/');
+
+        if (separator > 0) {
+            return category.substring(0, separator);
+        }
+
+        return category;
     }
 
     @Override

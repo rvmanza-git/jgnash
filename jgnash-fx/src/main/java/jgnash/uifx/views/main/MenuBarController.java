@@ -50,6 +50,7 @@ import jgnash.uifx.actions.ExportAccountsAction;
 import jgnash.uifx.actions.ImportAccountsAction;
 import jgnash.uifx.actions.ImportOfxAction;
 import jgnash.uifx.actions.ImportQifAction;
+import jgnash.uifx.actions.ImportRevolutCsvAction;
 import jgnash.uifx.dialog.ChangeDatabasePasswordDialogController;
 import jgnash.uifx.dialog.ImportScriptsDialogController;
 import jgnash.uifx.dialog.PackDatabaseDialogController;
@@ -128,6 +129,9 @@ public class MenuBarController implements MessageListener {
     private MenuItem importOfxMenuItem;
 
     @FXML
+    private MenuItem importRevolutCsvMenuItem;
+
+    @FXML
     private MenuItem transNumberListMenuItem;
 
     @FXML
@@ -174,6 +178,7 @@ public class MenuBarController implements MessageListener {
         importAccountsMenuItem.disableProperty().bind(disabled);
         importOfxMenuItem.disableProperty().bind(disabled);
         importQifMenuItem.disableProperty().bind(disabled);
+        importRevolutCsvMenuItem.disableProperty().bind(disabled);
         recurringTransactionsMenuItem.disableProperty().bind(disabled);
         reportMenu.disableProperty().bind(disabled);
         saveAsMenuItem.disableProperty().bind(disabled);
@@ -435,6 +440,11 @@ public class MenuBarController implements MessageListener {
     @FXML
     private void handleImportQIFAction() {
         ImportQifAction.showAndWait();
+    }
+
+    @FXML
+    private void handleImportRevolutCSVAction() {
+        ImportRevolutCsvAction.showAndWait();
     }
 
     @FXML

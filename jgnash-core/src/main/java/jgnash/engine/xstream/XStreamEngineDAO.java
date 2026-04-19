@@ -33,6 +33,7 @@ import jgnash.engine.dao.CommodityDAO;
 import jgnash.engine.dao.ConfigDAO;
 import jgnash.engine.dao.EngineDAO;
 import jgnash.engine.dao.RecurringDAO;
+import jgnash.engine.dao.RevolutPayeeMappingDAO;
 import jgnash.engine.dao.TagDAO;
 import jgnash.engine.dao.TransactionDAO;
 import jgnash.engine.dao.TrashDAO;
@@ -55,6 +56,8 @@ class XStreamEngineDAO extends AbstractXStreamDAO implements EngineDAO {
     private RecurringDAO recurringDAO;
 
     private TagDAO tagDAO;
+
+    private RevolutPayeeMappingDAO revolutPayeeMappingDAO;
 
     private TransactionDAO transactionDAO;
 
@@ -157,8 +160,14 @@ class XStreamEngineDAO extends AbstractXStreamDAO implements EngineDAO {
         return tagDAO;
     }
 
-    @Override
-    public synchronized TrashDAO getTrashDAO() {
+    @Override    public synchronized RevolutPayeeMappingDAO getRevolutPayeeMappingDAO() {
+        if (revolutPayeeMappingDAO == null) {
+            revolutPayeeMappingDAO = new XStreamRevolutPayeeMappingDAO(container);
+        }
+        return revolutPayeeMappingDAO;
+    }
+
+    @Override    public synchronized TrashDAO getTrashDAO() {
         if (trashDAO == null) {
             trashDAO = new XStreamTrashDAO(container);
         }

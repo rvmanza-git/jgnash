@@ -88,7 +88,11 @@ public class QifImport {
     }
 
     public void doFullImport() {
+        System.out.println("\n=== QifImport.doFullImport() STARTED ===");
+    System.out.println("Parser is null: " + (parser == null));
+
         if (parser != null) {
+        System.out.println("Starting import process...");
 
             importCategories();
             importAccounts();
@@ -98,6 +102,7 @@ public class QifImport {
     }
 
     public boolean doPartialParse(final File file) {
+        System.out.println("\n=== QifImport.doPartialParse() STARTED ===");
         if (file != null) {
             partialImport = true;
 
@@ -124,6 +129,7 @@ public class QifImport {
     }
 
     private void importAccounts() {
+            System.out.println("\n=== importAccounts() called ===");
         loadAccountMap();
         addAccounts();
     }
@@ -175,7 +181,7 @@ public class QifImport {
      * first
      */
     private void addAccounts() {
-
+System.out.println("\n=== addAccounts() STARTED ===");
         logger.info("*** Importing Accounts ***");
 
         List<QifAccount> list = parser.accountList;
@@ -216,6 +222,9 @@ public class QifImport {
     }
 
     private void addTransactions(final QifAccount qAcc, final Account acc) {
+          System.out.println("\n=== addTransactions() called for account: " + qAcc.name);
+    System.out.println("Number of transactions: " + qAcc.getTransactions().size());
+    
         if (qAcc.getTransactions().isEmpty()) {
             return;
         }
@@ -244,6 +253,7 @@ public class QifImport {
     }
 
     private void addCategories() {
+        System.out.println("addCategories invoked");
         List<QifCategory> list = parser.categories;
         Map<String, Account> map;
         for (QifCategory cat : list) {
@@ -267,6 +277,7 @@ public class QifImport {
      * @return best Account match
      */
     private Account findBestParent(final QifCategory cat, final Map<String, Account> map) {
+        System.out.println("findBestParent invoked for category: " + cat.name);
         int i = cat.name.lastIndexOf(':');
         if (i != -1) {
             String pathName = cat.name.substring(0, i);
@@ -305,6 +316,7 @@ public class QifImport {
      */
     private Account findBestAccount(final String category) {
         Account acc = null;
+        logger.log(Level.INFO, "Looking for bank account...");
 
         // nulls can happen and don't search on an empty category
         if (category != null && !category.isEmpty()) {
@@ -313,21 +325,30 @@ public class QifImport {
             if (isAccount(name)) { // account
                 name = category.substring(1, category.length() - 1);
                 logger.log(Level.FINEST, "Looking for bank account: {0}", name);
+                System.out.println("Looking for bank account: " + name);
                 acc = accountMap.get(name);
+                System.out.println("  Result: " + (acc != null ? "FOUND" : "NOT FOUND"));
             }
 
             if (acc == null) { // income or expense account
                 // strip any category tags
                 name = QifUtils.stripCategoryTags(name);
+                System.out.println("Looking for expense/income category: " + name);
+                System.out.println("  expenseMap keys: " + expenseMap.keySet());
+                System.out.println("  incomeMap keys: " + incomeMap.keySet());
 
                 acc = expenseMap.get(name);
+                System.out.println("  expenseMap.get('" + name + "'): " + acc);
+                
                 if (acc == null) {
                     acc = incomeMap.get(name);
+                    System.out.println("  incomeMap.get('" + name + "'): " + acc);
                 }
             }
 
             if (acc == null) {
                 logger.log(Level.WARNING, "No account match for: {0}", name);
+                System.out.println("WARNING: No account match for: " + name);
             }
         }
         return acc;
@@ -437,14 +458,23 @@ public class QifImport {
     private Transaction generateTransaction(final QifTransaction qTran, final Account acc) {
         Objects.requireNonNull(acc);
 
+        System.out.println("\n=== generateTransaction called ===");
+    System.out.println("Transaction category: " + qTran.category);
+    System.out.println("Transaction account: " + qTran.getAccount());
+    System.out.println("Amount: " + qTran.getAmount());
+    System.out.println("Payee: " + qTran.getPayee());
+
         boolean reconciled = "x".equalsIgnoreCase(qTran.status);
 
         Transaction tran;
         Account cAcc;
         if (qTran.getAccount() != null) {
             cAcc = qTran.getAccount();
+            System.out.println("Using qTran.getAccount()");
         } else {
+                    System.out.println("Calling findBestAccount with category: " + qTran.category);
             cAcc = findBestAccount(qTran.category);
+                    System.out.println("findBestAccount returned: " + cAcc);
         }
 
         if (qTran.hasSplits()) {
