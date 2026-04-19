@@ -1,10 +1,18 @@
 #!/usr/bin/env sh
 
 cwd=$(dirname "$0")
-"$cwd"/bin/bootloader "$@"
+
+# Use bootloader by default for packaged distributions.
+# Set JGNASH_BYPASS_BOOTLOADER=1 to force bypass when OS-specific JavaFX files are already present.
+extra_args=""
+if [ "${JGNASH_BYPASS_BOOTLOADER}" = "1" ]; then
+  extra_args="--bypassBootloader"
+fi
+
+"$cwd"/bin/bootloader $extra_args "$@"
 
 if [ $? -eq 100 ]; then #relaunch automatically if return value is 100
-  "$cwd"/bin/bootloader "$@"
+  "$cwd"/bin/bootloader $extra_args "$@"
 fi
 
 exit 0

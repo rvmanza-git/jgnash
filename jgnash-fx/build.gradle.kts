@@ -99,6 +99,35 @@ tasks.test {
 
 tasks.startScripts {
     applicationName = "bootloader"
+
+    doLast {
+        val script = unixScript
+
+        if (script.exists()) {
+            val needle = """
+# Add default JVM options here. You can also use JAVA_OPTS and BOOTLOADER_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS=""
+""".trimIndent()
+
+            val replacement = """
+# Add default JVM options here. You can also use JAVA_OPTS and BOOTLOADER_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS=""
+
+if "${'$'}darwin" ; then
+    DOCK_ICON="${'$'}APP_HOME/media/applet.icns"
+    if [ -f "${'$'}DOCK_ICON" ] ; then
+        DEFAULT_JVM_OPTS="${'$'}DEFAULT_JVM_OPTS -Xdock:icon=${'$'}DOCK_ICON"
+    fi
+fi
+""".trimIndent()
+
+            val content = script.readText()
+
+            if (content.contains(needle)) {
+                script.writeText(content.replace(needle, replacement))
+            }
+        }
+    }
 }
 
 tasks.distZip {
@@ -141,6 +170,9 @@ distributions {
             from("../README.html")
             from("../README.adoc")
             from("../jGnash")
+            from("../media") {
+                into("media")
+            }
             exclude("**/*-linux*")  // excludes linux specific JavaFx modules from cross platform zip
             exclude("**/*-win*")    // excludes windows specific JavaFx modules from cross platform zip
             exclude("**/*-mac*")    // excludes mac specific JavaFx modules from cross platform zip
