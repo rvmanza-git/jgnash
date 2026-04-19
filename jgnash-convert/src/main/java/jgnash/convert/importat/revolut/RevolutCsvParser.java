@@ -29,6 +29,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
+import java.util.Map;
 
 import jgnash.convert.importat.ImportTransaction;
 import jgnash.util.FileMagic;
@@ -55,7 +56,26 @@ public final class RevolutCsvParser {
     private RevolutCsvParser() {
     }
 
+    /**
+     * Parse a Revolut CSV file without payee mappings.
+     *
+     * @param path path to the CSV file
+     * @return parsed RevolutBank with transactions
+     * @throws IOException if the file cannot be read
+     */
     public static RevolutBank parse(final Path path) throws IOException {
+        return parse(path, Map.of());
+    }
+
+    /**
+     * Parse a Revolut CSV file with optional payee to account mappings.
+     *
+     * @param path path to the CSV file
+     * @param payeeMappings map of payee names to destination account names
+     * @return parsed RevolutBank with transactions
+     * @throws IOException if the file cannot be read
+     */
+    public static RevolutBank parse(final Path path, final Map<String, String> payeeMappings) throws IOException {
         final RevolutBank bank = new RevolutBank();
 
         final Charset charset = FileMagic.detectCharset(path.toString());
@@ -92,13 +112,20 @@ public final class RevolutCsvParser {
                 importTransaction.setAmount(amount);
                 importTransaction.setDatePosted(parseDate(get(record, "Completed Date"), get(record, "Started Date")));
 
-                final String description = get(record, "Description");
+                final String description = resolvePayee(record);
                 final String type = get(record, "Type");
                 final String product = get(record, "Product");
 
-                importTransaction.setPayee(!description.isEmpty() ? description : type);
+                final String payee = !description.isEmpty() ? description : type;
+                importTransaction.setPayee(payee);
                 importTransaction.setMemo(buildMemo(type, product));
 
+
+                // Apply payee mapping if available - store the account path in accountTo
+                final String mappedAccount = findMappedAccount(payee, payeeMappings);
+                if (mappedAccount != null && !mappedAccount.isEmpty()) {
+                    importTransaction.setAccountTo(mappedAccount);
+                }
                 final String id = get(record, "ID");
                 if (!id.isEmpty()) {
                     importTransaction.setFITID(id);
@@ -134,6 +161,58 @@ public final class RevolutCsvParser {
         return type + " - " + product;
     }
 
+    private static String resolvePayee(final CSVRecord record) {
+        final String[] candidates = {
+                get(record, "Description"),
+                get(record, "Counterparty"),
+                get(record, "Merchant"),
+                get(record, "Beneficiary"),
+                get(record, "Partner"),
+                get(record, "Reference")
+        };
+
+        for (final String candidate : candidates) {
+            if (!candidate.isEmpty()) {
+                return candidate;
+            }
+        }
+
+        return "";
+    }
+
+    private static String findMappedAccount(final String payee, final Map<String, String> payeeMappings) {
+        final String normalizedPayee = normalizePayee(payee);
+
+        // 1) Exact match first.
+        String mappedAccount = payeeMappings.get(normalizedPayee);
+        if (mappedAccount != null && !mappedAccount.isEmpty()) {
+            return mappedAccount;
+        }
+
+        // 2) Best fuzzy match for common variants (e.g. "Netflix" vs "Netflix.com").
+        String bestKey = null;
+        for (final String mappingKey : payeeMappings.keySet()) {
+            if (mappingKey.isEmpty()) {
+                continue;
+            }
+
+            if (normalizedPayee.contains(mappingKey) || mappingKey.contains(normalizedPayee)) {
+                if (bestKey == null || mappingKey.length() > bestKey.length()) {
+                    bestKey = mappingKey;
+                }
+            }
+        }
+
+        if (bestKey != null) {
+            mappedAccount = payeeMappings.get(bestKey);
+            if (mappedAccount != null && !mappedAccount.isEmpty()) {
+                return mappedAccount;
+            }
+        }
+
+        return null;
+    }
+
     private static BigDecimal parseAmount(final String value) {
         String amount = value.trim().replace(",", "");
 
@@ -144,6 +223,10 @@ public final class RevolutCsvParser {
         amount = amount.replaceAll("[^0-9.\\-]", "");
 
         return new BigDecimal(amount);
+    }
+
+    private static String normalizePayee(final String payee) {
+        return payee == null ? "" : payee.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
     }
 
     private static LocalDate parseDate(final String completedDate, final String startedDate) {

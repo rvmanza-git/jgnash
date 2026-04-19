@@ -22,10 +22,13 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -392,6 +395,12 @@ public class ImportPageTwoController extends AbstractWizardPaneController<Import
                 }
             }
 
+            @SuppressWarnings("unchecked")
+            final Map<String, String> payeeMappings = (Map<String, String>) map.get(ImportWizard.Settings.PAYEE_MAPPINGS);
+
+            // Apply Revolut payee mappings (if present) so mapped destination accounts are visible in the preview table.
+            applyRevolutPayeeMappings(list, payeeMappings);
+
             tableView.getItems().setAll(list);
             FXCollections.sort(tableView.getItems());
 
@@ -511,6 +520,161 @@ public class ImportPageTwoController extends AbstractWizardPaneController<Import
         }
 
         return category;
+    }
+
+    private static void applyRevolutPayeeMappings(final List<ImportTransaction> list,
+                                                  final Map<String, String> payeeMappings) {
+        final Engine engine = EngineFactory.getEngine(EngineFactory.DEFAULT);
+        Objects.requireNonNull(engine);
+
+        final List<Account> allAccounts = collectAllAccounts(engine);
+
+        for (final ImportTransaction importTransaction : list) {
+            String accountPath = importTransaction.getAccountTo();
+
+            // If parser stage did not set accountTo, resolve again from the provided mapping dictionary.
+            if ((accountPath == null || accountPath.isEmpty()) && payeeMappings != null && !payeeMappings.isEmpty()) {
+                accountPath = findMappedPath(importTransaction.getPayee(), payeeMappings);
+            }
+
+            if (accountPath != null && !accountPath.isEmpty()) {
+                final Account account = findAccountByPathName(allAccounts, accountPath);
+
+                if (account != null) {
+                    importTransaction.setAccount(account);
+                    importTransaction.setAccountTo(null);
+                }
+            }
+        }
+    }
+
+    private static String findMappedPath(final String payee, final Map<String, String> payeeMappings) {
+        final String normalizedPayee = normalizePayee(payee);
+
+        String mappedPath = payeeMappings.get(normalizedPayee);
+        if (mappedPath != null && !mappedPath.isEmpty()) {
+            return mappedPath;
+        }
+
+        String bestKey = null;
+        for (final String mappingKey : payeeMappings.keySet()) {
+            if (mappingKey.isEmpty()) {
+                continue;
+            }
+
+            if (normalizedPayee.contains(mappingKey) || mappingKey.contains(normalizedPayee)) {
+                if (bestKey == null || mappingKey.length() > bestKey.length()) {
+                    bestKey = mappingKey;
+                }
+            }
+        }
+
+        if (bestKey != null) {
+            mappedPath = payeeMappings.get(bestKey);
+            if (mappedPath != null && !mappedPath.isEmpty()) {
+                return mappedPath;
+            }
+        }
+
+        return null;
+    }
+
+    private static String normalizePayee(final String payee) {
+        return payee == null ? "" : payee.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
+    }
+
+    private static List<Account> collectAllAccounts(final Engine engine) {
+        final Set<Account> accounts = new LinkedHashSet<>();
+
+        addAccountsRecursively(engine.getAccountList(), accounts);
+        addAccountsRecursively(engine.getIncomeAccountList(), accounts);
+        addAccountsRecursively(engine.getExpenseAccountList(), accounts);
+
+        return new ArrayList<>(accounts);
+    }
+
+    private static void addAccountsRecursively(final List<Account> source, final Set<Account> destination) {
+        if (source == null) {
+            return;
+        }
+
+        for (final Account account : source) {
+            if (destination.add(account)) {
+                addAccountsRecursively(account.getChildren(), destination);
+            }
+        }
+    }
+
+    private static Account findAccountByPathName(final List<Account> allAccounts, final String pathName) {
+        final String normalizedRequested = normalizeAccountPath(pathName);
+
+        if (normalizedRequested.isEmpty()) {
+            return null;
+        }
+
+        // 1) Exact full path match.
+        for (final Account account : allAccounts) {
+            if (normalizeAccountPath(account.getPathName()).equalsIgnoreCase(normalizedRequested)) {
+                return account;
+            }
+        }
+
+        // 2) Match path without the root prefix (common for user-provided values).
+        for (final Account account : allAccounts) {
+            final String accountPath = normalizeAccountPath(account.getPathName());
+            final int separator = accountPath.indexOf(':');
+
+            if (separator != -1 && separator + 1 < accountPath.length()) {
+                final String withoutRoot = accountPath.substring(separator + 1);
+                if (withoutRoot.equalsIgnoreCase(normalizedRequested)) {
+                    return account;
+                }
+            }
+        }
+
+        // 3) Match suffix for deep hierarchies.
+        for (final Account account : allAccounts) {
+            final String accountPath = normalizeAccountPath(account.getPathName());
+            if (accountPath.endsWith(":" + normalizedRequested)) {
+                return account;
+            }
+        }
+
+        // 4) Final fallback: leaf name only.
+        final int lastSeparator = normalizedRequested.lastIndexOf(':');
+        final String leafName = lastSeparator == -1 ? normalizedRequested : normalizedRequested.substring(lastSeparator + 1);
+
+        for (final Account account : allAccounts) {
+            if (account.getName().equalsIgnoreCase(leafName)) {
+                return account;
+            }
+        }
+
+        return null;
+    }
+
+    private static String normalizeAccountPath(final String path) {
+        if (path == null) {
+            return "";
+        }
+
+        String normalized = path.trim().replaceAll("\\s*:\\s*", ":");
+
+        normalized = normalized.replaceAll("\\s+", " ");
+
+        while (normalized.contains("::")) {
+            normalized = normalized.replace("::", ":");
+        }
+
+        if (normalized.startsWith(":")) {
+            normalized = normalized.substring(1);
+        }
+
+        if (normalized.endsWith(":")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+
+        return normalized;
     }
 
     @Override

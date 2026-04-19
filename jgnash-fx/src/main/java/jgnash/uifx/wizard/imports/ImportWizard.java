@@ -46,7 +46,8 @@ public class ImportWizard {
         BANK,
         ACCOUNT,
         TRANSACTIONS,
-        DATE_FORMAT
+        DATE_FORMAT,
+        PAYEE_MAPPINGS
     }
 
     private final ObjectProperty<WizardDialogController<Settings>> wizardController = new SimpleObjectProperty<>();
