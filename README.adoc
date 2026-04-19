@@ -11,7 +11,17 @@ any operating system that has a current Java Runtime Environment (e.g., Linux, M
 
 See the <<Requirements>> section below for more details.
 
+[[ai-devel-branch-notes]]
+== ai-devel Branch Notes
+
+This branch includes integration work focused on import and packaging improvements.
+
+- QIF import: category/account mapping behavior was improved so explicit QIF categories/transfers are applied more reliably during import.
+- Revolut CSV import: new import flow and parser support were added, including optional payee-to-account mapping support.
+- Packaging: distribution launch behavior and startup script handling were updated for better production usability.
+
 === Contents:
+* <<ai-devel-branch-notes, ai-devel Branch Notes>>
 * <<About, About jGnash>>
    - <<Features>>
 * <<Donations>>
@@ -53,7 +63,8 @@ vertical and horizontal scroll wheels in a date picker, and the collapsible tran
 [[Donations]]
 == Donations
 
-Donations are always welcome and appreciated.  This helps to defer the cost of computer hardware and internet access.
+You can always keep making donations to the original developer of jGnash who indicated that donations are always welcome and appreciated to help to defer the cost of computer hardware and internet access.
+This ai-devel fork branch doesn't require right now donations as code is produced by AI.
 
 https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TYN4QECUL5C44[image:https://img.shields.io/badge/Donate-PayPal-green.svg[PayPal]]
 
@@ -75,6 +86,7 @@ The preferred method of reporting bugs is to use the https://github.com/ccavanau
 
 Java 11 or newer is required to run jGnash.  Unless you have a specific need
 for a newer version, Java 11 is currently recommended.
+Note: The ai-devel branch has been tested with openjdk 21.0.9
 
 Use of a prebuilt installer is recommended.
 

@@ -463,9 +463,31 @@ any operating system that has a current Java Runtime Environment (e.g., Linux, M
 <p>See the <a href="#Requirements">Requirements</a> section below for more details.</p>
 </div>
 <div class="sect2">
+<h3 id="ai-devel-branch-notes">ai-devel Branch Notes</h3>
+<div class="paragraph">
+<p>This branch includes integration work focused on import and packaging improvements.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>QIF import: category/account mapping behavior was improved so explicit QIF categories/transfers are applied more reliably during import.</p>
+</li>
+<li>
+<p>Revolut CSV import: new import flow and parser support were added, including optional payee-to-account mapping support.</p>
+</li>
+<li>
+<p>Packaging: distribution launch behavior and startup script handling were updated for better production usability.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_contents">Contents:</h3>
 <div class="ulist">
 <ul>
+<li>
+<p><a href="#ai-devel-branch-notes">ai-devel Branch Notes</a></p>
+</li>
 <li>
 <p><a href="#About">About jGnash</a></p>
 <div class="ulist">
@@ -570,7 +592,8 @@ vertical and horizontal scroll wheels in a date picker, and the collapsible tran
 <h2 id="Donations">Donations</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Donations are always welcome and appreciated.  This helps to defer the cost of computer hardware and internet access.</p>
+<p>You can always keep making donations to the original developer of jGnash who indicated that donations are always welcome and appreciated to help to defer the cost of computer hardware and internet access.
+This ai-devel fork branch doesn&#8217;t require right now donations as code is produced by AI.</p>
 </div>
 <div class="paragraph">
 <p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=TYN4QECUL5C44"><span class="image"><img src="https://img.shields.io/badge/Donate-PayPal-green.svg" alt="PayPal"></span></a></p>
@@ -601,6 +624,9 @@ Your first post to the group will be moderated to filter spam.</p>
 <div class="paragraph">
 <p>Java 11 or newer is required to run jGnash.  Unless you have a specific need
 for a newer version, Java 11 is currently recommended.</p>
+</div>
+<div class="paragraph">
+<p>Note: The ai-devel branch has been tested with openjdk 21.0.9</p>
 </div>
 <div class="paragraph">
 <p>Use of a prebuilt installer is recommended.</p>
