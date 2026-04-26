@@ -1,0 +1,264 @@
+image:https://jgnash.github.io/img/jgnash-logo.png[jGnash Logo]
+
+== jGnash README
+
+https://sourceforge.net/projects/jgnash/[jGnash] is a free (no strings attached!) personal finance manager with many
+of the same features as commercially-available software. It was created in order to make tracking personal finances
+easy, but also provides the functionality needed by advanced users. jGnash is cross-platform and will run on
+any operating system that has a current Java Runtime Environment (e.g., Linux, Mac OS X, and Microsoft Windows).
+
+* jGnash requires *Java 11* or newer and is compatible with the open source OpenJDK Platform, and the Oracle JVM as well.
+
+See the <<Requirements>> section below for more details.
+
+[[ai-devel-branch-notes]]
+== ai-devel Branch Notes
+
+This branch includes integration work focused on import and packaging improvements.
+
+- QIF import: category/account mapping behavior was improved so explicit QIF categories/transfers are applied more reliably during import.
+- Revolut CSV import: new import flow and parser support were added, including optional payee-to-account mapping support.
+- Packaging: distribution launch behavior and startup script handling were updated for better production usability.
+
+=== Contents:
+* <<ai-devel-branch-notes, ai-devel Branch Notes>>
+* <<About, About jGnash>>
+   - <<Features>>
+* <<Donations>>
+* <<Support, Support>>
+* <<Requirements>>
+   - <<Reqs-Java, Java>>
+   - <<Reqs-OS, Supported Operating System versions>>
+* <<Download>>
+* <<Install, Installation>>
+* <<Running, Running jGnash>>
+* <<Development, Building and Development>>
+
+[[About]]
+== About jGnash
+
+[[Features]]
+=== jGnash Features
+
+- Operates on any operating system with Java 11 or newer installed
+- Double Entry Accounting with reconciliation tools
+- OFX, QFX, mt940, and QIF import capabilities
+- Investment Accounts and automatic import of Stocks, Bond, and Funds price history
+- Nestable accounts with automatic rollup of totals and intelligent handling of mixed currencies
+- Reminders with automatic transaction entry
+- Intelligent handling of multiple currencies and exchange rates with automatic online exchange rate updates
+- Printable reports with PDF and spreadsheet export capability
+- XML, Binary, and multiple relational database file formats
+- Supports concurrent multiple users over a network
+
+To learn more about the features of jGnash, visit the https://sourceforge.net/projects/jgnash/[jGnash Website].
+
+The jGnash download includes a user manual to help get you started with the basics if you are new to tracking finances.
+It also covers some of the more subtle features, command line options, and shortcuts that are not immediately obvious.
+
+The latest version of jGnash uses *OpenJFX* for the user interface. This replaces the old version that used Java Swing
+for the user interface.  Experienced jGnash users will notice interface improvements.  For example, try using the
+vertical and horizontal scroll wheels in a date picker, and the collapsible transaction forms.
+
+[[Donations]]
+== Donations
+
+You can always keep making donations to the original developer of jGnash who indicated that donations are always welcome and appreciated to help to defer the cost of computer hardware and internet access.
+This ai-devel fork branch doesn't require right now donations as code is produced by AI.
+
+https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TYN4QECUL5C44[image:https://img.shields.io/badge/Donate-PayPal-green.svg[PayPal]]
+
+[[Support]]
+== Support
+The *https://groups.google.com/forum/#!forum/jgnash-user[jGnash Help Group]* is
+always a good source if you need help and *is the prefered method of contact.*
+Your first post to the group will be moderated to filter spam.
+
+Please use the search tool to check for similar questions.
+
+The preferred method of reporting bugs is to use the https://github.com/ccavanaugh/jgnash/issues[Github Issue tracker].
+
+[[Requirements]]
+== Requirements
+
+[[Reqs-Java]]
+=== 1. Java
+
+Java 11 or newer is required to run jGnash.  Unless you have a specific need
+for a newer version, Java 11 is currently recommended.
+Note: The ai-devel branch has been tested with openjdk 21.0.9
+
+Use of a prebuilt installer is recommended.
+
+  - https://www.azul.com/downloads/zulu/[Azul OpenJDK 11] is a branded release that will be easiest to install for most users and is free to use.
+  - https://adoptopenjdk.net/index.html?variant=openjdk11&jvmVariant=hotspot[AdoptOpenJDK] will require manual installation but allows more flexibility and is free to use.
+  - https://jdk.java.net/11/[https://jdk.java.net/11 (OpenJDK)/] will require manual installation and is free to use.
+  - https://www.oracle.com/technetwork/java/javase/downloads/index.html[Oracle Java SE 11] will require manual installation and licensing is required.
+
+[NOTE]
+When performing a manual installation of Java, The *JAVA_HOME* Environment
+Variable must be set. Also, the Java bin directory must be added to the execution path.
+
+[NOTE]
+If you have multiple versions of Java installed on your system, The *JAVA_HOME* Environment
+Variable must be set to Java 11 or newer and the related Java bin directory must be the only version
+in the execution path. Mixing JVM and JDK versions will confuse the bootloader.
+
+*_Use of an OpenJDK package is recommended over use of Oracle JDK due to licensing requirements_*
+
+=== 2. OpenJFX
+jGnash uses OpenJFX for the user interface, but will automatically download
+and place the needed components within the lib directly of the jGnash installation.
+Portions of the OpenJFX components are OS specific and cannot be shared between
+different operating systems.
+
+
+[[Reqs-OS]]
+=== 3. Supported Operating Systems: Windows, Linux, or Mac OS X.
+
+==== Microsoft Windows
+
+*  any Windows release that can run the required version of Java
+
+==== Linux
+
+* any Linux distribution that can run the required version of Java
+
+[NOTE]
+jGnash is _not compatible_ with GCJ pre-installed on older Linux distributions.
+You will need to install *OpenJDK 11* for jGnash to operate correctly.
+
+==== Mac OS X
+
+* Mac OS X 10.8.3 or later
+* can run the required version of Java
+
+_Be sure to read <<Install-MacOSX, the section about installing on Mac OS X>> to create the startup script._
+
+
+[[Download]]
+== Download jGnash
+
+You can download jGnash from the https://sourceforge.net/projects/jgnash/files/Active%20Stable%202.x/[jGnash Download Page].   image:https://img.shields.io/sourceforge/dt/jgnash.svg["Download button", link="https://github.com/rvmanza-git/jgnash/releases/latest"]
+
+[[Install]]
+== To Install jGnash
+
+. Install the latest version of *Java 11*  if you don't already have it installed.
+_jGnash has been tested and is know to work on Java 12 through 14._
+
+** Developers will want the complete Java Development Kit (see build instructions below.)
+. Unzip all files into a directory of your choice leaving the directory structure unchanged.
+
+[[Install-Windows]]
+=== Windows Installation:
+
+Some Windows users with restricted rights may experience write access issues *(Access is denied exception)* with jGnash
+downloading the JavaFX dependencies.
+
+Unzipping and placing jGnash into `%AppData%\jGnash` will ensure the users has proper write access.
+
+[[Install-MacOSX]]
+=== Mac OS X Installation:
+
+. Copy the jGnash folder to `/Applications` and remove the version extension so that the final path looks like `/Applications/jGnash`.
+. Create an AppleScript that will run the application:
+.. Open the AppleScript Editor.
+
+.. Create the following script:
+
+
+    try
+        do shell script "/Applications/jGnash/jGnash"
+    end try
+
+
+.. Save it as an Application called `jGnash.app` in `/Applications/jGnash`
+
+. Instead of step 2,
+ you can set the `/Applications/jGnash/jGnash` file to _Open with..._ `Terminal.app` (the Terminal application).
+
+
+[[Running]]
+== To Run:
+
+Executable files are provided for Windows and UN*X users at the root of the installation directory. (These are `.exe`
+and `bash shell` files, respectively). Mac OS X users will have created application launch files per
+the <<Install-MacOSX, Mac installation instructions.>>
+
+[NOTE]
+jGnash will need to be restarted after the first launch of a new version.
+Operating System specific files are download and a restart is required for
+correct operation.
+
+* Windows: Simply double-click on the jGnash.exe file.
+
+* UN*X / MacOS:  Start jGnash with the provided *jGnash* Bash script.  If jGnash fails to launch, check your file
+permissions and make sure they are set to be executable or use an unzip tool that preserves file permissions.
+
+An example for UN*X users is shown below assuming you have changed to the installation directory:
+
+[source]
+----
+./jGnash
+----
+
+*Mac OS X:*  Run the application file you created per the <<Install-MacOSX, Mac installation instructions.>>
+
+
+[[Development]]
+== Building and Development
+
+Travis-CI Build Status image:https://travis-ci.org/ccavanaugh/jgnash.svg?branch=master["Build Status", link="https://travis-ci.org/ccavanaugh/jgnash"]
+
+=== Development List
+
+The https://groups.google.com/forum/#!forum/jgnash-devel[Google Groups jGnash Developer list] is the best
+place to start if you have questions or ideas.  Initial posts will are moderated to prevent spam.
+
+=== Development Tools
+
+The IDE used for the development of jGnash is IntelliJ IDEA, but any IDE that supports a Gradle build environment should work.
+
+For the ai-devel branch, development is performed with Visual Studio Code and GitHub AI tooling.
+
+image:https://github.com/jGnash/jgnash.github.io/blob/master/img/logo_IntelliJIDEA.png["IntelliJIDEA Logo", height=90, link="https://www.jetbrains.com/idea/"]
+
+
+=== Building jGnash:
+
+*Gradle* is used as the primary build system for jGnash.  The Gradle Wrapper is included (`gradlew` shell and .bat files) so that you do not need to
+install Gradle.  The Wrapper will automatically download the necessary dependencies.
+
+[NOTE]
+Depending on your OS (almost always Windows and OSX) the JCE Unlimited Strength Jurisdiction Policy Files for Java
+are needed for the unit tests to complete correctly.  If you do not want to install these files or are
+restricted by your locale, modify the test build or disable tests.  jGnash uses encryption for client / server
+communication and unit tests are performed to prevent regressions.
+
+To build jGnash you'll need the following software installed and correctly configured on your system:
+
+OpenJDK 11 or later.
+
+_If you are building with a recent 64bit Linux system, you may need to enable Multilib/32 Bit support capabilities.
+Otherwise, the Gradle build may fail when building the windows executables._
+
+To create the distribution zip file, start at the main directory and run the gradle task to clean and create the distribution:
+
+*Building on Windows:*
+
+[source]
+----
+gradlew clean distZip
+----
+
+*Building on UN*X or Mac OS X:*
+
+[source]
+----
+./gradlew clean distZip
+----
+
+
+This will run the Gradle tasks necessary to execute core tests and create the distribution file.  The distributable zip
+file will be produced at the root of the build directory called jGnash-_version_-bin.zip.

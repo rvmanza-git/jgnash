@@ -38,7 +38,7 @@ class RevolutCsvParserTest {
 
         assertEquals("Coffee Shop", bank.getTransactions().get(0).getPayee());
         assertEquals(new BigDecimal("-4.50"), bank.getTransactions().get(0).getAmount());
-        assertEquals(LocalDate.of(2026, 1, 1), bank.getTransactions().get(0).getDatePosted());
+        assertEquals(LocalDate.of(2025, 12, 31), bank.getTransactions().get(0).getDatePosted());
         assertEquals("rev-1", bank.getTransactions().get(0).getFITID());
 
         assertEquals("Salary", bank.getTransactions().get(1).getPayee());

@@ -110,7 +110,7 @@ public final class RevolutCsvParser {
                 final ImportTransaction importTransaction = new ImportTransaction();
 
                 importTransaction.setAmount(amount);
-                importTransaction.setDatePosted(parseDate(get(record, "Completed Date"), get(record, "Started Date")));
+                importTransaction.setDatePosted(parseDate(get(record, "Started Date"), get(record, "Completed Date")));
 
                 final String description = resolvePayee(record);
                 final String type = get(record, "Type");
