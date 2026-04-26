@@ -24,6 +24,7 @@ lib/
 *.fdb*
 *.out
 git_nosync/
+.DS_Store
 
 # keep the exe file for easy dist build on non Windows platfroms
 !rust-launcher/target/release/jGnash.exe
